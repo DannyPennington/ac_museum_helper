@@ -23,5 +23,7 @@ class MongoService @Inject()(
 
   def userCollection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
-
+  def addUser(user:User): Future[WriteResult] = {
+    userCollection.flatMap(_.insert.one(user))
+  }
 }
