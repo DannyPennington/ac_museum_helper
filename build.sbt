@@ -1,17 +1,17 @@
 name := """ac_museum_helper"""
-organization := "com.example"
 
-version := "1.0-SNAPSHOT"
+version := "0.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.13.1"
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
-libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+resolvers += "Akka Snapshot Repository" at "https://repo.akka.io/snapshots/"
 
-// Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.example.controllers._"
+scalaVersion := "2.12.2"
 
-// Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.example.binders._"
+libraryDependencies ++= Seq( jdbc , ehcache , ws , specs2 % Test , guice,
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.20.3-play27",
+  "org.slf4j" % "slf4j-api" % "1.7.25",
+  "codes.reactive" %% "scala-time" % "0.4.2"
+)
