@@ -15,4 +15,8 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
   def logout():Action[AnyContent] = Action {implicit request: Request[AnyContent] =>
     Redirect(routes.HomeController.index()).withNewSession
   }
+
+  def login(): Action[AnyContent] = Action {implicit request: Request[AnyContent] =>
+    Ok("A")
+  }
 }
