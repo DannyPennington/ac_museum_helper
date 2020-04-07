@@ -15,7 +15,7 @@ header nav ul {
 
 header nav ul li {
     border: 3px solid lightskyblue;
-    fill: deepskyblue;
+    background-color: lightskyblue;
     fill-opacity: 100%;
     border-radius: 20px;
     display: inline;
@@ -31,8 +31,9 @@ header li a {
     transition: 0.1s;
 }
 
-header li a:hover {
-    font-size: 1.55em;
+header li:hover {
+    background-color: deepskyblue;
+    font-size: 1.25em;
     color: gray(150);
     opacity: 0.8;
 }
