@@ -3,17 +3,24 @@
 <header>
     <nav>
     <div>
-        <ul>
-        <li style="padding: 10px 10px; border-radius: 15px"><a href="@routes.RegistrationController.showRegistration()">Register</a></li>
-        <li style="padding: 10px 10px; border-radius: 15px"><a href="">Log in</a></li>
-        </ul>
+        @if(request.session.get("user").isEmpty) {
+            <ul class="login">
+                <li><a href="@routes.RegistrationController.showRegistration()">Register</a></li>
+                <li><a href="">Log in</a></li>
+            </ul>
+        } else {
+            <ul>
+                <li class="user">Logged in as: @request.session.get("user") </li>
+                <li class="logoutbutton"><a href="@routes.LoginController.logout()">Log out</a></li>
+            </ul>
+        }
     </div>
     </nav>
 
     <nav>
     <div style="text-align: center; float: top">
         <ul>
-        <li><a href="">Home</a></li>
+        <li><a href="/">Home</a></li>
         <li><a href="">Fish</a></li>
         <li><a href="">Bugs</a></li>
         <li><a href="">About</a></li>

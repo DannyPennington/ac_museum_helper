@@ -38,3 +38,20 @@ header li:hover {
     opacity: 0.8;
 }
 
+.login {
+    padding: 10px 10px;
+    border-radius: 15px
+}
+
+.logoutbutton {
+    padding: 10px 10px;
+    border-radius: 15px;
+
+}
+
+.user {
+    background-color: white;
+    border-color: white;
+    padding: 0 0;
+
+}
