@@ -1,6 +1,11 @@
 @(form: Form[Registration])(implicit messagesProvider: MessagesProvider, request:Request[AnyContent])
 
 @main("Sign up!") {
+    <div>
+    @if(request.flash.get("usernameTaken").isDefined) {
+        Account with that username already exists, please choose another
+    }
+    </div>
 
     <div>
         @helper.form(routes.RegistrationController.submitRegistration()) {
