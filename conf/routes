@@ -2,6 +2,8 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET     /                           controllers.HomeController.index
 
+GET     /usersReinnit                controllers.RegistrationController.reInnit
+
 GET     /register                   controllers.RegistrationController.showRegistration
 POST    /register                   controllers.RegistrationController.submitRegistration
 GET     /addUser                    controllers.RegistrationController.addUser(username:String, email :String, password :String)
