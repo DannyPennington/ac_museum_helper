@@ -7,3 +7,5 @@ POST    /register                   controllers.RegistrationController.submitReg
 GET     /addUser                    controllers.RegistrationController.addUser(username:String, email :String, password :String)
 
 GET     /logout                     controllers.LoginController.logout
+GET     /login                      controllers.LoginController.showLogin()
+POST    /login                      controllers.LoginController.submitLogin()
