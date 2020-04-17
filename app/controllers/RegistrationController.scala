@@ -5,17 +5,30 @@ import models.{Registration, User}
 import play.api._
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
 class RegistrationController @Inject()(val components: ControllerComponents, val mongoService: MongoService) extends AbstractController(components) with play.api.i18n.I18nSupport{
 
   implicit def ec: ExecutionContext = components.executionContext
 
+  def reInnit(): Action[AnyContent] = Action.async { implicit request:Request[AnyContent] =>
+    mongoService.reInnitUsers.map(_ => Ok("Reinitialised collection with admin user"))
+  }
+
   def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    val user = User(username, email, password)
-    mongoService.addUser(user)
-    Future(Redirect(routes.HomeController.index()).withSession(request.session + ("user", user.username)))
+    if (Await.result(mongoService.userEmailExists(email), Duration.Inf)) {
+      Future(Redirect(routes.LoginController.showLogin()).flashing("emailTaken" -> "Yes"))
+    }
+    else if (Await.result(mongoService.userUsernameExists(username), Duration.Inf)) {
+      Future(Redirect(routes.RegistrationController.showRegistration()).flashing("usernameTaken" -> "Yes"))
+    }
+    else {
+      val user = User(username, email, password)
+      mongoService.addUser(user)
+      Future(Redirect(routes.HomeController.index()).withSession(request.session + ("user", user.username)))
+    }
   }
 
   def showRegistration(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>

@@ -12,7 +12,7 @@ import collection._
 import models.JsonFormats._
 import play.api.libs.json.{JsValue, Json}
 import reactivemongo.api.Cursor
-import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
+import play.modules.reactivemongo.{ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.WriteResult
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -23,14 +23,10 @@ class MongoService @Inject()(
 
   def userCollection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
-  def addUser(user: User): Future[WriteResult] = {
-    userCollection.flatMap(_.insert.one(user))
-  }
-
-  def findUserEmail(email: String): Future[Option[User]] = {
+  def userSearchHelper(category: String = "email", search: String): Future[List[User]] = {
     userCollection.map {
-      _.find(Json.obj("email" -> email))
-        .sort(Json.obj("email" -> -1))
+        _.find(Json.obj(category -> search))
+        .sort(Json.obj(category -> -1))
         .cursor[User]()
     }.flatMap(
       _.collect[List](
@@ -38,11 +34,40 @@ class MongoService @Inject()(
         Cursor.FailOnError[List[User]]()
       )
     )
+  }
+
+  def reInnitUsers: Future[WriteResult] = {
+    userCollection.map {
+      _.drop
+    }
+    addUser(User("admin", "admin@admin.com", "admin"))
+  }
+
+  def addUser(user: User): Future[WriteResult] = {
+    userCollection.flatMap(_.insert.one(user))
+  }
+
+  def findUserEmail(email: String): Future[Option[User]] = {
+    userSearchHelper("email",email)
+      .map(_.headOption)
+  }
+
+  def findUserUsername(username: String):Future[Option[User]] ={
+    userSearchHelper("username", username)
       .map(_.headOption)
   }
 
   def userEmailExists(email: String): Future[Boolean] = {
     findUserEmail(email).map {
+      _.getOrElse(None)
+      match {
+        case None => false
+        case _ => true
+      }
+    }
+  }
+  def userUsernameExists(username: String): Future[Boolean] = {
+    findUserUsername(username).map {
       _.getOrElse(None)
       match {
         case None => false
