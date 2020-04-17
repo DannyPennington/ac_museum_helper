@@ -6,7 +6,7 @@
         @if(request.session.get("user").isEmpty) {
             <ul class="login">
                 <li><a href="@routes.RegistrationController.showRegistration()">Register</a></li>
-                <li><a href="">Log in</a></li>
+                <li><a href="@routes.LoginController.showLogin()">Log in</a></li>
             </ul>
         } else {
             <ul>
