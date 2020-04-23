@@ -5,8 +5,8 @@
     <div>
         @if(request.session.get("user").isEmpty) {
             <ul class="login">
-                <li><a href="@routes.RegistrationController.showRegistration()">Register</a></li>
-                <li><a href="@routes.LoginController.showLogin()">Log in</a></li>
+                <li><a href="@routes.RegistrationController.showRegistration("")">Register</a></li>
+                <li><a href="@routes.LoginController.showLogin("")">Log in</a></li>
             </ul>
         } else {
             <ul>
@@ -21,9 +21,9 @@
     <div style="text-align: center; float: top">
         <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="">Fish</a></li>
-        <li><a href="">Bugs</a></li>
-        <li><a href="">About</a></li>
+        <li><a href="/">Fish</a></li>
+        <li><a href="/">Bugs</a></li>
+        <li><a href="/">About</a></li>
         </ul>
     </div>
     </nav>

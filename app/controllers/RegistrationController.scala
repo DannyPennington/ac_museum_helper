@@ -18,11 +18,14 @@ class RegistrationController @Inject()(val components: ControllerComponents, val
   }
 
   def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    var err = ""
     if (Await.result(mongoService.userEmailExists(email), Duration.Inf)) {
-      Future(Redirect(routes.LoginController.showLogin()).flashing("emailTaken" -> "Yes"))
+      err = "Email is already in use, please choose another or log in instead"
+      Future(Redirect(routes.RegistrationController.showRegistration(err)))
     }
     else if (Await.result(mongoService.userUsernameExists(username), Duration.Inf)) {
-      Future(Redirect(routes.RegistrationController.showRegistration()).flashing("usernameTaken" -> "Yes"))
+      err = "Username is already in use, please select another"
+      Future(Redirect(routes.RegistrationController.showRegistration(err)))
     }
     else {
       val user = User(username, email, password)
@@ -31,13 +34,13 @@ class RegistrationController @Inject()(val components: ControllerComponents, val
     }
   }
 
-  def showRegistration(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.registration(Registration.RegistrationForm))
+  def showRegistration(err: String = ""): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.registration(Registration.RegistrationForm, err))
   }
 
   def submitRegistration(): Action[AnyContent] = Action {implicit request: Request[AnyContent] =>
     Registration.RegistrationForm.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.registration(formWithErrors))
+      BadRequest(views.html.registration(formWithErrors, ""))
     }, { register =>
       Redirect(routes.RegistrationController.addUser(register.username, register.email, register.password))
 

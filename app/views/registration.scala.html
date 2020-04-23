@@ -1,10 +1,8 @@
-@(form: Form[Registration])(implicit messagesProvider: MessagesProvider, request:Request[AnyContent])
+@(form: Form[Registration], err: String)(implicit messagesProvider: MessagesProvider, request:Request[AnyContent])
 
 @main("Sign up!") {
     <div>
-    @if(request.flash.get("usernameTaken").isDefined) {
-        Account with that username already exists, please choose another
-    }
+        <h3>@err</h3>
     </div>
 
     <div>
