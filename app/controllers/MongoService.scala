@@ -10,10 +10,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json._
 import collection._
 import models.JsonFormats._
+import org.mindrot.jbcrypt.BCrypt
 import play.api.libs.json.{JsValue, Json}
 import reactivemongo.api.Cursor
 import play.modules.reactivemongo.{ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.WriteResult
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -40,7 +42,7 @@ class MongoService @Inject()(
     userCollection.map {
       _.drop
     }
-    addUser(User("admin", "admin@admin.com", "admin"))
+    addUser(User("admin", "admin@admin.com", BCrypt.hashpw("admin",BCrypt.gensalt())))
   }
 
   def addUser(user: User): Future[WriteResult] = {

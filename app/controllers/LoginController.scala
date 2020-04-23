@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 import views._
 import models.{Login, Registration, User}
+import org.mindrot.jbcrypt.BCrypt
 import play.api._
 import play.api.mvc._
 
@@ -28,7 +29,8 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
       BadRequest(views.html.login(formWithErrors, ""))
     }, { login =>
       val user = Await.result(mongoService.findUserEmail(login.email), Duration.Inf)
-      if ( user.isDefined && login.password == Await.result(mongoService.findUserEmail(login.email), Duration.Inf).head.password) {
+
+      if ( user.isDefined && BCrypt.checkpw(login.password,Await.result(mongoService.findUserEmail(login.email), Duration.Inf).head.password)) {
         Redirect(routes.HomeController.index()).withSession("user" -> user.get.username)
       }
     else {

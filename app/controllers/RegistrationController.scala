@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject._
 import models.{Registration, User}
+import org.mindrot.jbcrypt.BCrypt
 import play.api._
 import play.api.mvc._
 
@@ -28,7 +29,8 @@ class RegistrationController @Inject()(val components: ControllerComponents, val
       Future(Redirect(routes.RegistrationController.showRegistration(err)))
     }
     else {
-      val user = User(username, email, password)
+      val passwordhash = BCrypt.hashpw(password, BCrypt.gensalt())
+      val user = User(username, email, passwordhash)
       mongoService.addUser(user)
       Future(Redirect(routes.HomeController.index()).withSession(request.session + ("user", user.username)))
     }
