@@ -28,16 +28,27 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
     Login.LoginForm.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.login(formWithErrors, ""))
     }, { login =>
-      val user = Await.result(mongoService.findUserEmail(login.email), Duration.Inf)
-
-      if ( user.isDefined && BCrypt.checkpw(login.password,Await.result(mongoService.findUserEmail(login.email), Duration.Inf).head.password)) {
-        Redirect(routes.HomeController.index()).withSession("user" -> user.get.username)
+      if (mongoService.isEmail(login.account)) {
+        lazy val email = Await.result(mongoService.findUserEmail(login.account), Duration.Inf)
+        if (email.isDefined && BCrypt.checkpw(login.password, Await.result(mongoService.findUserEmail(login.account), Duration.Inf).head.password)) {
+          Redirect(routes.HomeController.index()).withSession("user" -> email.get.username)
+        }
+        else {
+          err = "Email address or password was incorrect"
+          Redirect(routes.LoginController.showLogin(err))
+        }
       }
-    else {
-      err = "Email address or password was incorrect"
-      Redirect(routes.LoginController.showLogin(err))
-    }
-    }
+      else {
+        lazy val username = Await.result(mongoService.findUserUsername(login.account), Duration.Inf)
+        if (username.isDefined && BCrypt.checkpw(login.password, Await.result(mongoService.findUserUsername(login.account), Duration.Inf).head.password)) {
+          Redirect(routes.HomeController.index()).withSession("user" -> username.get.username)
+        }
+        else {
+          err = "Username or password was incorrect"
+          Redirect(routes.LoginController.showLogin(err))
+        }
+      }
+      }
     )
   }
 }
