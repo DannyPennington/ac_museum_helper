@@ -1,6 +1,6 @@
 @()(implicit request:Request[AnyContent])
 
-<header>
+<header style="position: absolute">
     <nav>
     <div>
         @if(request.session.get("user").isEmpty) {
