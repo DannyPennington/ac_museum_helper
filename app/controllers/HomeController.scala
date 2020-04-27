@@ -16,4 +16,8 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     }
   }
 
+  def about(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.about())
+
+  }
 }
