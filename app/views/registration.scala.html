@@ -1,8 +1,12 @@
-@(form: Form[Registration], err: String)(implicit messagesProvider: MessagesProvider, request:Request[AnyContent])
+@(form: Form[Registration])(implicit messagesProvider: MessagesProvider, request:Request[AnyContent], messages: Messages)
 
 @main("Sign up!") {
     <div>
-        <h3>@err</h3>
+        <h3>
+        @if(request.session.get("registrationError").isDefined) {
+            @messages(request.session.get("registrationError").get.toString)
+            }
+        </h3>
     </div>
 
     <div>

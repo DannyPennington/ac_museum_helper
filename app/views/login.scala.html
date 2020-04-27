@@ -1,9 +1,13 @@
-@(form: Form[Login], err: String)(implicit request: Request[AnyContent], messagesProvider: MessagesProvider)
+@(form: Form[Login])(implicit request: Request[AnyContent], messagesProvider: MessagesProvider, messages: Messages)
 
 @main("Login time baby") {
-
+<input value="@request.flash.get("attempts").getOrElse("")">
     <div>
-        <h3>@err</h3>
+        <h3>
+        @if(request.session.get("loginError").isDefined) {
+            @messages(request.session.get("loginError").get.toString)
+        }
+        </h3>
     </div>
     <div>
         @helper.form(routes.LoginController.submitLogin()) {

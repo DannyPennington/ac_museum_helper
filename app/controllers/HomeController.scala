@@ -8,7 +8,12 @@ import play.api.mvc._
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
 
   def index(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    if (request.session.get("user").isEmpty) {
+      Ok(views.html.index()).withNewSession
+    }
+    else {
+      Ok(views.html.index())
+    }
   }
 
 }

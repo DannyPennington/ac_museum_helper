@@ -20,13 +20,13 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
   }
 
   def showLogin(err: String = ""): Action[AnyContent] = Action {implicit request: Request[AnyContent] =>
-    Ok(views.html.login(Login.LoginForm, err))
+    Ok(views.html.login(Login.LoginForm))
   }
 
   def submitLogin(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    var err = ""
+
     Login.LoginForm.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.login(formWithErrors, ""))
+      BadRequest(views.html.login(formWithErrors))
     }, { login =>
       if (mongoService.isEmail(login.account)) {
         lazy val email = Await.result(mongoService.findUserEmail(login.account), Duration.Inf)
@@ -34,8 +34,7 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
           Redirect(routes.HomeController.index()).withSession("user" -> email.get.username)
         }
         else {
-          err = "Email address or password was incorrect"
-          Redirect(routes.LoginController.showLogin(err))
+          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect").flashing("attempts" -> attempts.toString)
         }
       }
       else {
@@ -44,8 +43,7 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
           Redirect(routes.HomeController.index()).withSession("user" -> username.get.username)
         }
         else {
-          err = "Username or password was incorrect"
-          Redirect(routes.LoginController.showLogin(err))
+          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect").flashing("attempts" -> attempts.toString)
         }
       }
       }

@@ -4,13 +4,17 @@ import javax.inject._
 import models.{Registration, User}
 import org.mindrot.jbcrypt.BCrypt
 import play.api._
+import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
-class RegistrationController @Inject()(val components: ControllerComponents, val mongoService: MongoService) extends AbstractController(components) with play.api.i18n.I18nSupport{
+class RegistrationController @Inject()(val components: ControllerComponents,
+                                       val mongoService: MongoService)
+  extends AbstractController(components)
+    with play.api.i18n.I18nSupport{
 
   implicit def ec: ExecutionContext = components.executionContext
 
@@ -18,31 +22,30 @@ class RegistrationController @Inject()(val components: ControllerComponents, val
     mongoService.reInnitUsers.map(_ => Ok("Reinitialised collection with admin user"))
   }
 
-  def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    var err = ""
+  def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async {
+    implicit request: Request[AnyContent] =>
+
     if (Await.result(mongoService.userEmailExists(email), Duration.Inf)) {
-      err = "Email is already in use, please choose another or log in instead"
-      Future(Redirect(routes.RegistrationController.showRegistration(err)))
+      Future(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.emailInUse"))
     }
     else if (Await.result(mongoService.userUsernameExists(username), Duration.Inf)) {
-      err = "Username is already in use, please select another"
-      Future(Redirect(routes.RegistrationController.showRegistration(err)))
+      Future(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.userInUse"))
     }
     else {
       val passwordhash = BCrypt.hashpw(password, BCrypt.gensalt())
       val user = User(username, email, passwordhash)
       mongoService.addUser(user)
-      Future(Redirect(routes.HomeController.index()).withSession(request.session + ("user", user.username)))
+      Future(Redirect(routes.HomeController.index()).withSession("user" -> user.username))
     }
   }
 
-  def showRegistration(err: String = ""): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.registration(Registration.RegistrationForm, err))
+  def showRegistration(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.registration(Registration.RegistrationForm))
   }
 
   def submitRegistration(): Action[AnyContent] = Action {implicit request: Request[AnyContent] =>
     Registration.RegistrationForm.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.registration(formWithErrors, ""))
+      BadRequest(views.html.registration(formWithErrors))
     }, { register =>
       Redirect(routes.RegistrationController.addUser(register.username, register.email, register.password))
 
