@@ -34,7 +34,7 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
           Redirect(routes.HomeController.index()).withSession("user" -> email.get.username)
         }
         else {
-          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect").flashing("attempts" -> attempts.toString)
+          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect")
         }
       }
       else {
@@ -43,7 +43,7 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
           Redirect(routes.HomeController.index()).withSession("user" -> username.get.username)
         }
         else {
-          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect").flashing("attempts" -> attempts.toString)
+          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect")
         }
       }
       }
