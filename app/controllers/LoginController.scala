@@ -8,7 +8,7 @@ import play.api._
 import play.api.mvc._
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class LoginController @Inject()(val components: ControllerComponents, val mongoService: MongoService) extends AbstractController(components) with play.api.i18n.I18nSupport {
@@ -23,30 +23,35 @@ class LoginController @Inject()(val components: ControllerComponents, val mongoS
     Ok(views.html.login(Login.LoginForm))
   }
 
-  def submitLogin(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-
+  def submitLogin(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     Login.LoginForm.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.login(formWithErrors))
+      Future.successful(BadRequest(views.html.login(formWithErrors)))
     }, { login =>
       if (mongoService.isEmail(login.account)) {
-        lazy val email = Await.result(mongoService.findUserEmail(login.account), Duration.Inf)
-        if (email.isDefined && BCrypt.checkpw(login.password, Await.result(mongoService.findUserEmail(login.account), Duration.Inf).head.password)) {
-          Redirect(routes.HomeController.index()).withSession("user" -> email.get.username)
-        }
-        else {
-          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect")
+        mongoService.findUserEmail(login.account).map {
+          case user@Some(_) =>
+            if (BCrypt.checkpw(login.password, user.head.password)) {
+              Redirect(routes.HomeController.index()).withSession("user" -> user.get.username)
+            }
+            else {
+              Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect")
+            }
+          case _ => Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.emailIncorrect")
         }
       }
       else {
-        lazy val username = Await.result(mongoService.findUserUsername(login.account), Duration.Inf)
-        if (username.isDefined && BCrypt.checkpw(login.password, Await.result(mongoService.findUserUsername(login.account), Duration.Inf).head.password)) {
-          Redirect(routes.HomeController.index()).withSession("user" -> username.get.username)
-        }
-        else {
-          Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect")
+        mongoService.findUserUsername(login.account).map {
+          case user@Some(_) =>
+            if (BCrypt.checkpw(login.password, user.head.password)) {
+              Redirect(routes.HomeController.index()).withSession("user" -> user.get.username)
+            }
+            else {
+              Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect")
+            }
+          case _ => Redirect(routes.LoginController.showLogin()).withSession("loginError" -> "error.userIncorrect")
         }
       }
-      }
+    }
     )
   }
 }

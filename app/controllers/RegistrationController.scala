@@ -8,7 +8,8 @@ import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc._
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class RegistrationController @Inject()(val components: ControllerComponents,
@@ -16,26 +17,21 @@ class RegistrationController @Inject()(val components: ControllerComponents,
   extends AbstractController(components)
     with play.api.i18n.I18nSupport{
 
-  implicit def ec: ExecutionContext = components.executionContext
-
   def reInnit(): Action[AnyContent] = Action.async { implicit request:Request[AnyContent] =>
-    mongoService.reInnitUsers.map(_ => Ok("Reinitialised collection with admin user"))
+    mongoService.reInnitUsers.map( _ => Ok(views.html.message("Reinitialised collection with admin user")))
   }
 
-  def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
-
-    if (Await.result(mongoService.userEmailExists(email), Duration.Inf)) {
-      Future(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.emailInUse"))
-    }
-    else if (Await.result(mongoService.userUsernameExists(username), Duration.Inf)) {
-      Future(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.userInUse"))
-    }
-    else {
-      val passwordhash = BCrypt.hashpw(password, BCrypt.gensalt())
-      val user = User(username, email, passwordhash)
-      mongoService.addUser(user)
-      Future(Redirect(routes.HomeController.index()).withSession("user" -> user.username))
+  def addUser(username: String, email: String, password: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    mongoService.userEmailExists(email).flatMap {
+      case true => Future.successful(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.emailInUse"))
+      case false => mongoService.userUsernameExists(username).flatMap {
+        case true => Future.successful(Redirect(routes.RegistrationController.showRegistration()).withSession("registrationError" -> "error.userInUse"))
+        case false =>
+          val passwordhash = BCrypt.hashpw(password, BCrypt.gensalt())
+          val user = User(username, email, passwordhash)
+          mongoService.addUser(user)
+          Future.successful(Redirect(routes.HomeController.index()).withSession("user" -> user.username))
+      }
     }
   }
 
