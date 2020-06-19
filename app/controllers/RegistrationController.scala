@@ -6,6 +6,7 @@ import org.mindrot.jbcrypt.BCrypt
 import play.api._
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc._
+import play.api.Logger
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
