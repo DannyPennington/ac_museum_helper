@@ -11,4 +11,5 @@ GET     /addUser                    controllers.RegistrationController.addUser(u
 
 GET     /logout                     controllers.LoginController.logout
 GET     /login                      controllers.LoginController.showLogin()
+
 POST    /login                      controllers.LoginController.submitLogin()
