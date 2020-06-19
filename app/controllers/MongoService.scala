@@ -3,8 +3,9 @@ package controllers
 
 import javax.inject.Inject
 import models._
-import play.api.mvc._
-import reactivemongo.play.json.collection.{JSONCollection, _}
+import play.api.mvc
+import reactivemongo.play.json.collection.JSONCollection
+import play.api.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json._
@@ -21,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class MongoService @Inject()(
                               val reactiveMongoApi: ReactiveMongoApi
-                            ) extends ReactiveMongoComponents {
+                            ) extends ReactiveMongoComponents with Logging {
 
   def userCollection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
@@ -42,10 +43,13 @@ class MongoService @Inject()(
     userCollection.map {
       _.drop
     }
-    addUser(User("admin", "admin@admin.com", BCrypt.hashpw("admin",BCrypt.gensalt())))
+    val result = addUser(User("admin", "admin@admin.com", BCrypt.hashpw("admin",BCrypt.gensalt())))
+    logger.info("[MongoService][reInnitUsers] Database reinitialized with admin user")
+    result
   }
 
   def addUser(user: User): Future[WriteResult] = {
+    logger.info("[MongoService][addUser] New user added")
     userCollection.flatMap(_.insert.one(user))
   }
 

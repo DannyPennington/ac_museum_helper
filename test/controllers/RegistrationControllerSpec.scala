@@ -19,12 +19,5 @@ class RegistrationControllerSpec extends PlaySpec with GuiceOneAppPerTest with I
     }
   }
 
-  "display the registration form on the page from router" in {
-    val request = FakeRequest(GET, "/register?err=").withFormUrlEncodedBody("err" ->"")
-    val result = route(app, request).get
-    status(result) mustBe OK
-    contentType(result) mustBe Some("text/html")
-    contentAsString(result) must include ("<form action=\"/register\" method=\"POST\" >")
-  }
 
 }
