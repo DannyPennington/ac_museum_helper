@@ -47,16 +47,19 @@ header li:hover {
     padding: 10px 10px;
     border-radius: 15px;
     display: inline-block;
+
 }
 
 .user {
     background-color: white;
     border-color: white;
     padding: 0 0;
+
 }
 
 .user:hover{
     font-size: 1em;
     color: black;
     background-color: white;
+
 }
