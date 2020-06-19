@@ -6,21 +6,21 @@ pipeline {
         stage('Compile') {
             steps {
                 echo "Compiling..."
-                sh "/usr/local/bin/sbt compile"
+                bat "/usr/local/bin/sbt compile"
             }
         }
 
         stage('Test') {
             steps {
                 echo "Testing..."
-                sh "/usr/local/bin/sbt test"
+                bat "/usr/local/bin/sbt test"
             }
         }
 
         stage('Package') {
             steps {
                 echo "Packaging..."
-                sh "/usr/local/bin/sbt package"
+                bat "/usr/local/bin/sbt package"
             }
         }
 
